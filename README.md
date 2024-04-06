@@ -14,7 +14,7 @@ Imagens: A imagem da logo do site foi gerada por inteligencia artificial.
 
 
 <div align="center">
-  ![image](https://github.com/VitorSena0/ProjectFunctional.js/assets/97699477/8176aa6d-8122-47d4-9b1f-d9eb263bb281)
 
-  
+  ![Captura de tela 2024-04-06 202616](https://github.com/VitorSena0/ProjectFunctional.js/assets/97699477/2396283f-ecd8-4f0a-83c1-09108adf6d50)
+
 </div>
