@@ -64,7 +64,8 @@ const processarCSV = () => {
             )
           ),
       ].slice(1)[0]; // Remove a primeira linha, que é o cabeçalho
-      recebeListaAtletas(csvLimpo);
+      
+      recebeListaAtletas(csvLimpo);// chama a função que executa o quiz e é definida abaixo e passa como argumento o csv processado
     })
     .catch(error => { // O método catch é chamado quando a Promise é rejeitada, e retorna um erro
       console.error('Ocorreu um erro ao processar o arquivo CSV:', error);
@@ -77,16 +78,24 @@ processarCSV(); // Chama a função para processar o arquivo CSV
 
 // Função que recebe a lista de atletas e executa o quiz
 const recebeListaAtletas = (registroAtletas) => {
+// O array de perguntas, é um array de objetos, o primeiro objeto é o próprio texto da pergunta 
+// O segundo elemento dos objetos é uma função que busca a resposta certa e cria as alternativas 
+// O terceiro elemento é a pontuação, que vale 1 em cada pergunta 
+// A lógica da função busca resposta será explicada na primeira pergunta, visto que nas próximas perguntas a lógica será parecida, com alguns ajustes.
 
   const perguntas = [
+     // Pergunta 1: País com mais medalhas de ouro no basquete masculino até 2014
     {
       pergunta: "Which country has won the most gold medals in men's basketball until 2014?",
       buscarResposta: (atletas) => (alternativas = undefined) => {
+        // cada pergunta usa uma função que filtra o array atletas de acordo com a pergunta
         const medalhasOuroPorPais = atletas.filter(atleta => atleta.medal == "Gold" && atleta.sex == "M" && atleta.year <= 2014)
           .reduce((contador, atleta) => {
+            // A função reduce, conta o número de atletas que sobrou após o processamento anterior (.filter).
             contador[atleta.team] = (contador[atleta.team] || 0) + 1; // Incrementa o contador de medalhas de ouro para o país
             return contador;
           }, {});
+           // Função para ordenar aleatoriamente as respostas
         const aleatorioOrdena = () => Math.random() - 0.5;
         const corte = alternativas !== undefined ? alternativas : Object.keys(medalhasOuroPorPais).length + 1; // Determina o número de alternativas a serem retornadas
         const paisComMaisOuro = [...Object.keys(medalhasOuroPorPais), 'Spain'].slice(0, corte); // Faz uma cópia do array de países com medalhas de ouro e depois faz o corte do array de acordo com o número de alternativas ou a resposta corrta
@@ -94,6 +103,7 @@ const recebeListaAtletas = (registroAtletas) => {
       },
       pontos: 1
     },
+    // Pergunta 2: Número de vezes que a equipe masculina de basquete dos Estados Unidos ganhou a medalha de ouro até 2016
     {
       pergunta: "How many times has the United States men's basketball team won the gold medal until 2016?",
       buscarResposta: atletas => (alternativas = undefined) => {
@@ -113,6 +123,7 @@ const recebeListaAtletas = (registroAtletas) => {
       },
       pontos: 1
     },
+     // Pergunta 3: Número de países que ganharam medalhas de ouro no basquete masculino até 1980
     {
       pergunta: "How many countries have won gold medals in men's basketball in the Olympics until 1980?",
       buscarResposta: atletas => (alternativas = undefined) => {
@@ -133,6 +144,7 @@ const recebeListaAtletas = (registroAtletas) => {
       },
       pontos: 1
     },
+    // Pergunta 4: Número de medalhas concedidas aos atletas da equipe de basquete da Iugoslávia até 2016
     {
       pergunta: "How many medals have been awarded to athletes from the Yugoslavia basketball team until 2016?",
       buscarResposta: atletas => (alternativas = undefined) => {
@@ -145,6 +157,7 @@ const recebeListaAtletas = (registroAtletas) => {
       },
       pontos: 1
     },
+     // Pergunta 5: País que ganhou a primeira medalha de ouro no basquete feminino nas Olimpíadas
     {
       pergunta: "Which country was the first to win a gold medal in women's basketball at the Olympics?",
       buscarResposta: atletas => (alternativas = undefined) => {
@@ -164,13 +177,11 @@ const recebeListaAtletas = (registroAtletas) => {
       },
       pontos: 1
     },
+
     {
-      // A pergunta sobre a União Soviética no basquete masculino até 1992
+      // Pergunta 6: Número de vezes que a equipe masculina de basquete da União Soviética ganhou a medalha de ouro até 1992
       pergunta: "How many times did the Soviet Union men's basketball team win the gold medal until 1992?",
-  
-      // Função para buscar a resposta, que recebe os atletas como parâmetro e retorna outra função opcionalmente recebendo alternativas
       buscarResposta: atletas => (alternativas = undefined) => {
-          // Filtra os atletas relevantes com base nas condições fornecidas
           const medalhasUniaoSovietica = atletas.filter(atleta => atleta.team == "Soviet Union" && atleta.sex == "M" && atleta.year <= 1992 && atleta.medal !== "NA")
                                                 .reduce((acc, atleta)=> {
                                                   index = acc.findIndex(x => x.year == atleta.year);
@@ -182,57 +193,121 @@ const recebeListaAtletas = (registroAtletas) => {
             // resposta 9 vezes 
           // Outras opções de resposta
           const outrasAlternativas = [6, 8, 10, 12];
-  
-          // Função para ordenar aleatoriamente as respostas
           const aleatorioOrdena = () => Math.random() - 0.5;
-  
           // Determina o número de alternativas a serem retornadas
           const corte = alternativas !== undefined ? alternativas : outrasAlternativas.length + 1;
-  
-          // Constrói a resposta, incluindo o número de medalhas da União Soviética e algumas alternativas adicionais, ordenadas aleatoriamente
           const resposta = [...[medalhasUniaoSovietica, ...outrasAlternativas].slice(0, corte).sort((a, b) => a - b)];
-  
-          // Retorna a resposta com as alternativas ordenadas aleatoriamente
           return [...resposta].sort(aleatorioOrdena);
       },
-  
-      // Pontos atribuídos para esta pergunta
       pontos: 1
-  }
+  },
+  // Pergunta 7: Número de vezes que a equipe feminina de basquete do Brasil ganhou a medalha de ouro até 2008
+  {
+    pergunta: "How many times did Brazil win gold medals in women's basketball until 2008?",
+    buscarResposta: (atletas) => (alternativas = undefined) => {
+        const ouroBrasilFeminino = atletas.filter(atleta => atleta.medal == "Gold" && atleta.team == "Brazil" && atleta.sex == "F" && atleta.year <= 2008).length;
+        const outrasAlternativas = [2, 3, 4, 5];
+        const aleatorioOrdena = () => Math.random() - 0.5;
+        const corte = alternativas !== undefined ? alternativas : outrasAlternativas.length + 1;
+        const resposta = [...[ouroBrasilFeminino, ...outrasAlternativas].slice(0,corte)];
+        return [...resposta].sort(aleatorioOrdena);
+    },
+    pontos: 1
+},
+// Pergunta 8: País que ganhou a primeira medalha de ouro no basquete feminino nas Olimpíadas
+{
+  pergunta: "Which country won the first gold medal in women's basketball at the Olympics?",//PERGUNTA 8
+  buscarResposta: (atletas) => (alternativas = undefined) => {
+      const primeiraOuroFeminino = atletas.filter(atleta => atleta.medal == "Gold" && atleta.sex == "F")
+          .reduce((acc, atleta) => {
+              index = acc.findIndex(x => x.team == atleta.team);
+              if (index == -1) {
+                  acc = [...acc, atleta];
+              }
+              return acc;
+          }, []).sort((a, b) => a.year - b.year)[0].team;
+      const aleatorioOrdena = () => Math.random() - 0.5;
+      const corte = alternativas !== undefined ? alternativas : 5;
+      const resposta = [primeiraOuroFeminino, "USA", "Russia", "Australia", "China"].slice(0, corte);
+      return [...resposta].sort(aleatorioOrdena);
+  },
+  pontos: 1
+},
+ // Pergunta 9: Número de vezes que a equipe masculina de basquete do Canadá ganhou a medalha de ouro até 2012
+{
+  pergunta: "How many gold medals were awarded to Canada's athletes in men's basketball through 2012?",
+  buscarResposta: (atletas) => (alternativas = undefined) => {
+      const ouroCanadaMasculino = atletas.filter(atleta => atleta.medal == "Gold" && atleta.team == "Canada" && atleta.sex == "M" && atleta.year <= 2012).length;
+      const outrasAlternativas = [4, 1, 2, 3];
+      const aleatorioOrdena = () => Math.random() - 0.5;
+      const corte = alternativas !== undefined ? alternativas : outrasAlternativas.length + 1;
+      const resposta = [...[ouroCanadaMasculino, ...outrasAlternativas].slice(0, corte)];
+      return [...resposta].sort(aleatorioOrdena);
+  },
+  pontos: 1
+},
+// Pergunta 10: Ano em que o basquete foi introduzido nas Olimpíadas pela primeira vez
+{
+  pergunta: "In what year was basketball introduced to the Olympics for the first time?",
+  buscarResposta: (atletas) => (alternativas = undefined) => {
+      const primeiroAnoBasquete = atletas.filter(atleta => atleta.sport == "Basketball").map(atleta => atleta.year).sort()[0];
+      const aleatorioOrdena = () => Math.random() - 0.5;
+      const corte = alternativas !== undefined ? alternativas : 5;
+      const resposta = [primeiroAnoBasquete, 1900, 1920, 1936, 1948].slice(0, corte);
+      return [...resposta].sort(aleatorioOrdena);
+  },
+  pontos: 1
+}
+
+
   ];
 // Função utilizada para controlar estados de eventos, usada para atualizar indices em outras partes do código, sem o uso de váriaveis.
 // A função retorna um array contendo o valor inicial e o final
+  // Define uma função chamada definirEstado que recebe um estado inicial como parâmetro
   const definirEstado = (estadoinicial) => {
-    const ler = () => estadoinicial
-    const escrever = f => estadoinicial = typeof f == 'function' ? f(estadoinicial) : f
-    return [ler, escrever]
+    // Define uma função chamada ler que retorna o estado inicial
+    const ler = () => estadoinicial;
+    // Define uma função chamada escrever que atualiza o estado inicial com um novo valor
+    const escrever = f => estadoinicial = typeof f == 'function' ? f(estadoinicial) : f;
+    // Retorna um array contendo as funções ler e escrever
+    return [ler, escrever];
   }
+
+  // Define uma função chamada selecionaAlternativa
   const selecionaAlternativa = () => {
+    // Obtém a resposta correta para a pergunta atual
     const respostaCorreta = perguntas[IndexLeituraAtualQuestao()].buscarResposta(registroAtletas)(1)[0];
+    // Obtém todos os labels das alternativas
     const alternativasLabels = [...document.querySelectorAll('#answer-form label')];
 
+    // Adiciona um ouvinte de eventos de clique para cada label das alternativas
     [...alternativasLabels].map(label => {
       label.addEventListener('click', () => {
+        // Remove as classes 'selected', 'correct' e 'wrong' de todos os labels
         [...alternativasLabels].map(label => {
           label.classList.remove('selected');
           label.classList.remove('correct');
           label.classList.remove('wrong');
-          label.removeEventListener('click', () => { });// Remove o ouvinte de eventos de clique
+          label.removeEventListener('click', () => { }); // Remove o ouvinte de eventos de clique
         });
 
+        // Adiciona a classe 'selected' ao label clicado
         label.classList.add('selected');
+        // Verifica se a resposta selecionada é a resposta correta
         if (label.children[0].value == respostaCorreta) {
-          label.classList.add('correct');
+          label.classList.add('correct'); // Adiciona a classe 'correct' ao label
         } else {
-          label.classList.add('wrong');
-         // Encontra o label correto e adiciona a classe 'correct'
+          label.classList.add('wrong'); // Adiciona a classe 'wrong' ao label
+          // Encontra o label correto e adiciona a classe 'correct'
           const labelCorreto = alternativasLabels.find(label => label.children[0].value == respostaCorreta);
           labelCorreto.classList.add('correct');
         }
 
+        // Exibe o botão de próxima pergunta
         botaoProximaQuestao.style.display = "block";
+        // Desabilita eventos de ponteiro em todos os labels
         [...alternativasLabels].map(label => {
-          label.style.pointerEvents = "none";// Desabilita eventos de ponteiro em todos os labels
+          label.style.pointerEvents = "none";
         });
       });
     });
@@ -258,13 +333,16 @@ const recebeListaAtletas = (registroAtletas) => {
   const [lerRespostasCorretas, escreverRespostasCorretas] = definirEstado(0)
   const [lerRespostasIncorretas, escreverRespostasIncorretas] = definirEstado(0)
 
+
+  // Esta função é responsável por avançar para a próxima pergunta após o usuário responder à pergunta atual.
   const mostrarProximaPergunta = () => {
     const respostaUsuario = document.querySelector("input[name='answer']:checked");
-    const currentQuestionIndex = IndexLeituraAtualQuestao()
+    const indiceAtualQuestao = IndexLeituraAtualQuestao()
     const resposta = respostaUsuario.value;
-    const perguntaAtual = perguntas[currentQuestionIndex];
+    const perguntaAtual = perguntas[indiceAtualQuestao];
     const respostaCorreta = buscarRespostaCorreta(registroAtletas, perguntaAtual);
 
+    // Verifica se a resposta do usuário está correta e atualiza a contagem de respostas corretas ou incorretas
     if (resposta == respostaCorreta) {
       escreverRespostasCorretas(x => x + 1);
     } else {
@@ -284,6 +362,7 @@ const recebeListaAtletas = (registroAtletas) => {
 
   }
 
+  // Esta função reinicia o quiz, restaurando todos os estados para os valores iniciais e exibindo a primeira pergunta.
   const reiniciarQuiz = () => {
     // Reseta os estados para os valores iniciais
     IndexEscritaAtualQuestao(0)
@@ -295,12 +374,22 @@ const recebeListaAtletas = (registroAtletas) => {
     feedbackContainer.style.display = "none";
     contemQuestoes.style.display = "block";
   };
+  // Adiciona um evento de clique ao botão "Reiniciar Quiz" para chamar a função reiniciarQuiz quando o botão é clicado
   botaoReiniciarQuiz.addEventListener("click", reiniciarQuiz)
 
+  // Esta função exibe uma pergunta no formulário do quiz.
   const exibirPergunta = (pergunta, processCSV) => {
+
+    // Define o texto da pergunta no elemento HTML correspondente
     textoDaQuestao.textContent = pergunta.pergunta;
+
+    // Limpa o conteúdo do formulário de respostas
     respostaFormulario.innerHTML = "";
+
+    // Obtém as respostas possíveis chamando a função buscarResposta da pergunta e executando-a com o argumento processCSV
     const respostasPossiveis = [...(pergunta.buscarResposta(processCSV)())];
+
+     // Para cada resposta possível, cria um input radio e um label correspondente e os adiciona ao formulário de respostas
     respostasPossiveis.map(resposta => { // Mapeia as respostas possíveis e cria um input radio para cada uma
       const input = document.createElement("input");
       input.type = "radio";
@@ -318,6 +407,8 @@ const recebeListaAtletas = (registroAtletas) => {
   }
 
   exibirPergunta(perguntas[IndexLeituraAtualQuestao()], registroAtletas);
+  
+  // Adiciona um evento de clique ao botão "Próxima Questão" para chamar a função mostrarProximaPergunta quando o botão é clicado
   botaoProximaQuestao.addEventListener("click", mostrarProximaPergunta);
 
 
